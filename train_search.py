@@ -74,15 +74,16 @@ def main():
     torch.cuda.manual_seed(args.seed)
     logging.info("args = %s", args)
     #  prepare dataset
-    if args.cifar100:
-        train_transform, valid_transform = utils._data_transforms_cifar100(args)
-    else:
-        train_transform, valid_transform = utils._data_transforms_cifar10(args)
-    if args.cifar100:
-        train_data = dset.CIFAR100(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
-    else:
-        train_data = dset.CIFAR10(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
+    # if args.cifar100:
+    #     train_transform, valid_transform = utils._data_transforms_cifar100(args)
+    # else:
+    #     train_transform, valid_transform = utils._data_transforms_cifar10(args)
+    # if args.cifar100:
+    #     train_data = dset.CIFAR100(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
+    # else:
+    #     train_data = dset.CIFAR10(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
 
+    train_data, test_data = utils.get_data(args)
     num_train = len(train_data)
     indices = list(range(num_train))
     split = int(np.floor(args.train_portion * num_train))
