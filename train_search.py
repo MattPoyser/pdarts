@@ -32,13 +32,13 @@ parser.add_argument('--layers', type=int, default=5, help='total number of layer
 parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
 parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
 parser.add_argument('--drop_path_prob', type=float, default=0.3, help='drop path probability')
-parser.add_argument('--save', type=str, default='/tmp/checkpoints/', help='experiment path')
+parser.add_argument('--save', type=str, default='./tmp/checkpoints/', help='experiment path')
 parser.add_argument('--seed', type=int, default=2, help='random seed')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--train_portion', type=float, default=0.5, help='portion of training data')
 parser.add_argument('--arch_learning_rate', type=float, default=6e-4, help='learning rate for arch encoding')
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
-parser.add_argument('--tmp_data_dir', type=str, default='/tmp/cache/', help='temp data dir')
+parser.add_argument('--tmp_data_dir', type=str, default='/data/cifar-10/', help='temp data dir')
 parser.add_argument('--note', type=str, default='try', help='note for this run')
 parser.add_argument('--dropout_rate', action='append', default=[], help='dropout rate of skip connect')
 parser.add_argument('--add_width', action='append', default=['0'], help='add channels')
@@ -79,9 +79,9 @@ def main():
     else:
         train_transform, valid_transform = utils._data_transforms_cifar10(args)
     if args.cifar100:
-        train_data = dset.CIFAR100(root=args.tmp_data_dir, train=True, download=True, transform=train_transform)
+        train_data = dset.CIFAR100(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
     else:
-        train_data = dset.CIFAR10(root=args.tmp_data_dir, train=True, download=True, transform=train_transform)
+        train_data = dset.CIFAR10(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
 
     num_train = len(train_data)
     indices = list(range(num_train))
