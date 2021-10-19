@@ -77,7 +77,7 @@ class Cell(nn.Module):
 
 class Network(nn.Module):
 
-    def __init__(self, C, num_classes, layers, criterion, steps=4, multiplier=4, stem_multiplier=3, switches_normal=[], switches_reduce=[], p=0.0):
+    def __init__(self, C, num_classes, layers, criterion, steps=4, multiplier=4, stem_multiplier=3, switches_normal=[], switches_reduce=[], p=0.0, dataset="cifar"):
         super(Network, self).__init__()
         self._C = C
         self._num_classes = num_classes
@@ -98,8 +98,11 @@ class Network(nn.Module):
         self.switch_on = switch_ons[0]
 
         C_curr = stem_multiplier*C
+        in_channels = 3
+        if dataset == "mnist" or dataset == "fashion":
+            in_channels = 1
         self.stem = nn.Sequential(
-            nn.Conv2d(3, C_curr, 3, padding=1, bias=False),
+            nn.Conv2d(in_channels, C_curr, 3, padding=1, bias=False),
             nn.BatchNorm2d(C_curr)
         )
     
