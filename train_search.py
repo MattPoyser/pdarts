@@ -75,7 +75,7 @@ def main():
     cudnn.enabled=True
     torch.cuda.manual_seed(args.seed)
     logging.info("args = %s", args)
-    logging.info("args = %s", args.name)
+    logging.info("args = %s", args.dataset)
     #  prepare dataset
     # if args.cifar100:
     #     train_transform, valid_transform = utils._data_transforms_cifar100(args)
