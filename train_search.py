@@ -64,7 +64,7 @@ if args.cifar100:
 else:
     CIFAR_CLASSES = 10
     data_folder = 'cifar-10-batches-py'
-    
+
 def main():
     if not torch.cuda.is_available():
         logging.info('No GPU device available')
@@ -75,6 +75,7 @@ def main():
     cudnn.enabled=True
     torch.cuda.manual_seed(args.seed)
     logging.info("args = %s", args)
+    logging.info("args = %s", args.name)
     #  prepare dataset
     # if args.cifar100:
     #     train_transform, valid_transform = utils._data_transforms_cifar100(args)
