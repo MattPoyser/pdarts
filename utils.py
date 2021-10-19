@@ -137,19 +137,19 @@ def data_transform_general(name):
 
 
 def get_data(args):
-    train_transform, test_transform = data_transform_general(args.name)
-    if args.name == "mnist":
+    train_transform, test_transform = data_transform_general(args.dataset)
+    if args.dataset == "mnist":
         dset_cls = dset.MNIST
-    elif args.name == "fashion":
+    elif args.dataset == "fashion":
         dset_cls = dset.FashionMNIST
-    elif args.name == "cifar10":
+    elif args.dataset == "cifar10":
         dset_cls = dset.CIFAR10
-    elif args.name == "imagenet":
+    elif args.dataset == "imagenet":
         pass
     else:
         raise TypeError("Unknown dataset : {:}".format(args.name))
 
-    if args.name == "imagenet":
+    if args.dataset == "imagenet":
         subset_size = 10000
         dynamic_name = "imagenet"
         train_data = SubDataset(transforms=train_transform, val_transforms=test_transform, val=False,

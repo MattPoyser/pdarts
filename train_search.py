@@ -20,7 +20,7 @@ from genotypes import Genotype
 
 parser = argparse.ArgumentParser("cifar")
 parser.add_argument('--workers', type=int, default=2, help='number of workers to load dataset')
-parser.add_argument('--name', type=str, default="mnist", help='dataset to use')
+parser.add_argument('--dataset', type=str, default="mnist", help='dataset to use')
 parser.add_argument('--batch_size', type=int, default=32, help='batch size')
 parser.add_argument('--learning_rate', type=float, default=0.025, help='init learning rate')
 parser.add_argument('--learning_rate_min', type=float, default=0.0, help='min learning rate')
@@ -126,7 +126,7 @@ def main():
         drop_rate = [0.0, 0.0, 0.0]
     eps_no_archs = [10, 10, 10]
     for sp in range(len(num_to_keep)):
-        model = Network(args.init_channels + int(add_width[sp]), CIFAR_CLASSES, args.layers + int(add_layers[sp]), criterion, switches_normal=switches_normal, switches_reduce=switches_reduce, p=float(drop_rate[sp]), dataset=args.name)
+        model = Network(args.init_channels + int(add_width[sp]), CIFAR_CLASSES, args.layers + int(add_layers[sp]), criterion, switches_normal=switches_normal, switches_reduce=switches_reduce, p=float(drop_rate[sp]), dataset=args.dataset)
         model = nn.DataParallel(model)
         model = model.cuda()
         logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
