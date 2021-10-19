@@ -117,6 +117,11 @@ def data_transform_general(name):
     elif name == 'fashion':
         mean = [0.28604063146254594]
         std = [0.35302426207299326]
+    elif name == "cifar10":
+        mean = [0.5071, 0.4867, 0.4408]
+        std = [0.2675, 0.2565, 0.2761]
+    else:
+        raise TypeError("Unknown dataset : {:}".format(name))
 
     train_transform = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
@@ -142,7 +147,7 @@ def get_data(args):
     elif args.name == "imagenet":
         pass
     else:
-        raise TypeError("Unknow dataset : {:}".format(args.name))
+        raise TypeError("Unknown dataset : {:}".format(args.name))
 
     if args.name == "imagenet":
         subset_size = 10000

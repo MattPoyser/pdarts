@@ -64,6 +64,7 @@ if args.cifar100:
 else:
     CIFAR_CLASSES = 10
     data_folder = 'cifar-10-batches-py'
+    
 def main():
     if not torch.cuda.is_available():
         logging.info('No GPU device available')

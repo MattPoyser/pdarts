@@ -77,7 +77,7 @@ class Cell(nn.Module):
 
 class Network(nn.Module):
 
-    def __init__(self, C, num_classes, layers, criterion, steps=4, multiplier=4, stem_multiplier=3, switches_normal=[], switches_reduce=[], p=0.0, dataset="cifar"):
+    def __init__(self, C, num_classes, layers, criterion, steps=4, multiplier=4, stem_multiplier=3, switches_normal=[], switches_reduce=[], p=0.0, dataset="cifar10"):
         super(Network, self).__init__()
         self._C = C
         self._num_classes = num_classes
