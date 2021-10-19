@@ -5,7 +5,7 @@ import shutil
 import torchvision.transforms as transforms
 from torch.autograd import Variable
 import torchvision.datasets as dset
-
+import sys
 sys.path.insert(0, "/home/matt/Documents/hem/perceptual")
 sys.path.insert(0, "/home2/lgfm95/hem/perceptual")
 sys.path.insert(0, "C:\\Users\\Matt\\Documents\\PhD\\x11\\HEM\\perceptual")
