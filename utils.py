@@ -149,10 +149,12 @@ def get_data(args):
     if args.dataset == "mnist":
         dset_cls = dset.MNIST
         dynamic_name = "mnist"
+        grayscale = True
         auto_resume = "/home2/lgfm95/hem/perceptual/ganPercMnistGood.pth.tar"
     elif args.dataset == "fashion":
         dset_cls = dset.FashionMNIST
         dynamic_name = "fashion"
+        grayscale = True
         auto_resume = "/home2/lgfm95/hem/perceptual/ganPercFashionGood.pth.tar"
     elif args.dataset == "cifar10":
         dset_cls = dset.CIFAR10
@@ -160,8 +162,9 @@ def get_data(args):
         auto_resume = "/home2/lgfm95/hem/perceptual/ganPercCifar10Good.pth.tar"
     elif args.dataset == "imagenet":
         dynamic_name = "imagenet"
+        isize = 256
         auto_resume = "/home2/lgfm95/hem/perceptual/ganPercImagenetGood.pth.tar"
-        pass
+        convert_to_paths = True
     else:
         raise TypeError("Unknown dataset : {:}".format(args.name))
 
