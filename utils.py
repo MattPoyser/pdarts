@@ -138,26 +138,93 @@ def data_transform_general(name):
 
 def get_data(args):
     train_transform, test_transform = data_transform_general(args.dataset)
+    pretrain_resume = "/home2/lgfm95/hem/perceptual/good.pth.tar"
+    grayscale = False
+    is_detection = False
+    convert_to_paths = False
+    convert_to_lbl_paths = False
+    isize = 64
+    nz = 8
+    aisize = 256
     if args.dataset == "mnist":
         dset_cls = dset.MNIST
+        dynamic_name = "mnist"
+        auto_resume = "/home2/lgfm95/hem/perceptual/ganPercMnistGood.pth.tar"
     elif args.dataset == "fashion":
         dset_cls = dset.FashionMNIST
+        dynamic_name = "fashion"
+        auto_resume = "/home2/lgfm95/hem/perceptual/ganPercFashionGood.pth.tar"
     elif args.dataset == "cifar10":
         dset_cls = dset.CIFAR10
+        dynamic_name = "cifar10"
+        auto_resume = "/home2/lgfm95/hem/perceptual/ganPercCifar10Good.pth.tar"
     elif args.dataset == "imagenet":
+        dynamic_name = "imagenet"
+        auto_resume = "/home2/lgfm95/hem/perceptual/ganPercImagenetGood.pth.tar"
         pass
     else:
         raise TypeError("Unknown dataset : {:}".format(args.name))
 
-    if args.dataset == "imagenet":
-        subset_size = 10000
-        dynamic_name = "imagenet"
-        train_data = SubDataset(transforms=train_transform, val_transforms=test_transform, val=False,
-                                dataset_name=dynamic_name, subset_size=subset_size)
-        test_data = SubDataset(transforms=test_transform, val=True, dataset_name=dynamic_name, subset_size=subset_size)
+    if args.isbad:
+        auto_resume = "badpath"
+
+    normalize = transforms.Normalize(
+        mean=[0.13066051707548254],
+        std=[0.30810780244715075])
+    perc_transforms = transforms.Compose([
+        transforms.RandomResizedCrop(isize),
+        transforms.ToTensor(),
+        normalize,
+    ])
+    if args.dynamic:
+        # print(perc_transforms)
+        train_data = DynamicDataset(
+            perc_transforms=perc_transforms,
+            pretrain_resume=pretrain_resume,
+            image_transforms=train_transform,
+            val_transforms=test_transform,
+            val=False,
+            dataset_name=dynamic_name,
+            auto_resume=auto_resume,
+            hardness=args.hardness,
+            isize=isize,
+            nz=nz,
+            aisize=aisize,
+            grayscale=grayscale,
+            isTsne=True,
+            tree=args.isTree,
+            subset_size=args.subset_size,
+            is_csv=args.is_csv,
+            is_detection=is_detection,
+            convert_to_paths=convert_to_paths,
+            convert_to_lbl_paths=convert_to_lbl_paths,
+            bede=False)
+        # is_csv=False)
+        if args.dataset == "imagenet":
+            test_data = SubDataset(transforms=test_transform, val=True, dataset_name=dynamic_name,
+                                   subset_size=10000)
+        else:
+            test_data = dset_cls(root=args.tmp_data_dir, train=False, download=False, transform=test_transform)
     else:
-        train_data = dset_cls(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
-        test_data = dset_cls(root=args.tmp_data_dir, train=False, download=False, transform=test_transform)
+        if args.vanilla:
+            if args.dataset == "imagenet":
+                subset_size = 10000
+                dynamic_name = "imagenet"
+                train_data = SubDataset(transforms=train_transform, val_transforms=test_transform, val=False,
+                                        dataset_name=dynamic_name, subset_size=subset_size)
+                test_data = SubDataset(transforms=test_transform, val=True, dataset_name=dynamic_name, subset_size=subset_size)
+            else:
+                train_data = dset_cls(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
+                test_data = dset_cls(root=args.tmp_data_dir, train=False, download=False, transform=test_transform)
+        else: #abl
+            if args.dataset == "imagenet":
+                train_data = SubDataset(transforms=train_transform, val_transforms=test_transform, val=False,
+                                        dataset_name=dynamic_name, subset_size=args.subset_size)
+                test_data = SubDataset(transforms=test_transform, val=True, dataset_name=dynamic_name, subset_size=args.subset_size)
+            else:
+                subset_size = args.subset_size
+                train_data = SubDataset(transforms=train_transform, val_transforms=test_transform, val=False, dataset_name=dynamic_name, subset_size=subset_size)
+                test_data = SubDataset(transforms=test_transform, val=True, dataset_name=dynamic_name, subset_size=subset_size)
 
     return train_data, test_data
 
