@@ -16,6 +16,7 @@ import copy
 from model_search import Network
 from genotypes import PRIMITIVES
 from genotypes import Genotype
+import csv
 
 
 parser = argparse.ArgumentParser("cifar")
@@ -159,27 +160,47 @@ def main():
         epochs = args.epochs
         eps_no_arch = eps_no_archs[sp]
         scale_factor = 0.2
+        hardness = None
+        just_updated = True
+
+        valid_acc1 = 0
+        if args.issave:
+            save_indices(train_queue.dataset.get_printable(), 0)
         for epoch in range(epochs):
             scheduler.step()
-            lr = scheduler.get_lr()[0]
-            logging.info('Epoch: %d lr: %e', epoch, lr)
-            epoch_start = time.time()
-            # training
-            if epoch < eps_no_arch:
-                model.module.p = float(drop_rate[sp]) * (epochs - epoch - 1) / epochs
-                model.module.update_p()
-                train_acc, train_obj = train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=False)
+
+            epoch_type = get_epoch_type(epoch, hardness, valid_acc1)
+            if epoch_type or just_updated or not args.dynamic:  # 1 is train, as normal (0 is dataset update)
+                just_updated = False
+
+                lr = scheduler.get_lr()[0]
+                logging.info('Epoch: %d lr: %e', epoch, lr)
+                epoch_start = time.time()
+                # training
+                if epoch < eps_no_arch:
+                    model.module.p = float(drop_rate[sp]) * (epochs - epoch - 1) / epochs
+                    model.module.update_p()
+                    train_acc, train_obj, hardness, correct = train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=False)
+                else:
+                    model.module.p = float(drop_rate[sp]) * np.exp(-(epoch - eps_no_arch) * scale_factor)
+                    model.module.update_p()
+                    train_acc, train_obj, hardness, correct = train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=True)
+                logging.info('Train_acc %f', train_acc)
+                epoch_duration = time.time() - epoch_start
+                logging.info('Epoch time: %ds', epoch_duration)
+                # validation
+                if epochs - epoch < 5:
+                    valid_acc, valid_obj = infer(valid_queue, model, criterion)
+                    logging.info('Valid_acc %f', valid_acc)
+
             else:
-                model.module.p = float(drop_rate[sp]) * np.exp(-(epoch - eps_no_arch) * scale_factor) 
-                model.module.update_p()                
-                train_acc, train_obj = train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=True)
-            logging.info('Train_acc %f', train_acc)
-            epoch_duration = time.time() - epoch_start
-            logging.info('Epoch time: %ds', epoch_duration)
-            # validation
-            if epochs - epoch < 5:
-                valid_acc, valid_obj = infer(valid_queue, model, criterion)
-                logging.info('Valid_acc %f', valid_acc)
+                print("updating subset")
+                train_queue.dataset.update_subset(hardness, epoch)
+                save_indices(train_queue.dataset.get_printable(), epoch, [item for item in train_queue.dataset.cur_set])
+                just_updated = True
+                if args.ncc and args.visualize:
+                    train_queue.dataset.visualize(gdas=True)
+
         # utils.save(model, os.path.join(args.save, 'weights.pt'))
         print('------Dropping %d paths------' % num_to_drop[sp])
         # Save switches info for s-c refinement. 
@@ -281,7 +302,11 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
     objs = utils.AvgrageMeter()
     top1 = utils.AvgrageMeter()
     top5 = utils.AvgrageMeter()
-    
+
+    hardness = [None for i in range(len(train_queue))]
+    correct = [None for i in range(len(train_queue))]
+    batch_size = args.batch_size
+
     for step, (input, target) in enumerate(train_queue):
         model.train()
         n = input.size(0)
@@ -300,6 +325,12 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
             optimizer_a.zero_grad()
             logits = model(input_search)
             loss_a = criterion(logits, target_search)
+
+            new_hardness, new_correct = get_hardness(logits.cpu(), target.cpu(), False)
+            loss.backward()
+            hardness[(step * batch_size):(step * batch_size) + batch_size] = new_hardness  # assumes batch 1 takes idx 0-8, batch 2 takes 9-16, etc.
+            correct[(step * batch_size):(step * batch_size) + batch_size] = new_correct
+
             loss_a.backward()
             nn.utils.clip_grad_norm_(model.module.arch_parameters(), args.grad_clip)
             optimizer_a.step()
@@ -320,7 +351,7 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
         if step % args.report_freq == 0:
             logging.info('TRAIN Step: %03d Objs: %e R1: %f R5: %f', step, objs.avg, top1.avg, top5.avg)
 
-    return top1.avg, objs.avg
+    return top1.avg, objs.avg, hardness, correct
 
 
 def infer(valid_queue, model, criterion):
@@ -475,6 +506,108 @@ def keep_2_branches(switches_in, probs):
             for j in range(len(PRIMITIVES)):
                 switches[i][j] = False  
     return switches  
+
+
+
+################################# dynamic functions #####################################
+def save_indices(data, epoch, images=None):
+    if args.issave:
+        if args.ncc:
+            with open(f'/home2/lgfm95/nas/gdas/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}.csv', 'w') as csv_file:
+                csv_writer = csv.writer(csv_file, delimiter=' ')
+                csv_writer.writerow(data)
+            if images is not None:
+                image_dir = f'/home2/lgfm95/nas/gdas/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}'
+                os.makedirs(image_dir)
+                for q, image in enumerate(images):
+                    image.save(image_dir + f"{q}.png")
+
+        else:
+            with open(f'/hdd/PhD/nas/gdas/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}.csv', 'w') as csv_file:
+                csv_writer = csv.writer(csv_file, delimiter=' ')
+                csv_writer.writerow(data)
+
+
+# low value for hardness means harder.
+def get_hardness(output, target, is_multi):
+    if not is_multi:
+        # currently a binary association between correct classication => 0.8
+        # we want it to be a softmax representation. if we instead take crossentropy loss of each individual cf target
+        _, predicted = torch.max(output.data, 1)
+        confidence = F.softmax(output, dim=1)
+        hardness_scaler = np.where((predicted == target), 1, 0.1) # if correct, simply use confidence as measure of hardness
+        # therefore if model can easily say yep this is object X, then confidence will be high. if it only just manages to identify
+        # object X, confidence if lower
+        # if object X is misclassified, hardness needs to be lower still.
+        # assumes that it does not confidently misclassify.
+        hardness = [(confidence[i][predicted[i]] * hardness_scaler[i]).item() for i in range(output.size(0))]
+    else:
+        output = torch.sigmoid(output.float()).detach()
+        output[output>0.5] = 1
+        output[output<=0.5] = 0
+        confidence = F.softmax(output, dim=1)
+
+        hardness_scaler = []
+        hardness = []
+        assert len(output) == len(target) # should both be equal to batch size
+        for q in range(len(output)):
+            assert len(output[q]) == len(target[q]) # should both be equal to num_classes eg 184
+            correct_avg = (np.array(output[q]) == np.array(target[q])).sum() / len(output[q])
+            if correct_avg > 0.5: # this could be another threshold we change, or have it == hardness threshold
+                hardness_scaler.append(1)
+            else:
+                hardness_scaler.append(0.1)
+
+            correct = np.where(np.array(output[q]) == np.array(target[q]))[0]
+            hardness_value = [confidence[q][i] * 1 if i in correct else confidence[q][i] * 0.1 for i in range(len(output[q]))]
+            hardness.append(sum(hardness_value) / len(output[q]))
+
+
+        hardness_scaler = np.asarray(hardness_scaler)
+        hardness = np.array(hardness)
+        # raise AttributeError(output, target, hardness_scaler, hardness)
+
+    return hardness, hardness_scaler
+
+
+def get_epoch_type(epoch, hardness, top1):
+    # naive alternate, starting with normal training
+    if not args.dynamic or epoch < args.init_train_epochs:
+        return 1
+    is_mastered = get_mastered(hardness, top1)
+    if is_mastered:
+        print("mastered, therefore epoch type 0")
+        return 0
+    print("not mastered, therefore epoch type 1")
+    return 1
+
+
+def get_mastered(hardness, top1):
+    # if fraction of times where image is unconfidently/mis-classified is less than mastery threshold
+    # TODO use hardness across history eg mean hardness over last 5
+    # print("ahard", "\n")
+    # for aHard in hardness:
+        # print("ahard", aHard)
+    # print("len hardness", len(hardness))
+    # print("len hard ones", np.where(np.array(hardness) > 0.5))
+    # print("len hard ones", len(np.where(np.array(hardness) > 0.5)[0]))
+    # print("hardness calculations: ", (len(np.where(np.array(hardness) > g_config.hardness)[0]) / len(hardness)), g_config.mastery)
+
+    #if percentage of items considered hard exceeds a mastery threshold, update the subset.
+    if top1 is None:
+        if (len(np.where(np.array(hardness) > args.hardness)[0]) / len(hardness)) < args.mastery:
+            print("therefore not mastered")
+            return 0
+    else:
+        # print("grep working", top1)
+        if top1 < args.mastery:
+            return 0
+    # if len(np.where(np.array(hardness) < g_config.mastery)) > len(hardness)-2:
+        # a lot of images still being misclassified
+        # return 0
+    print("therefore mastered")
+    return 1
+
 
 if __name__ == '__main__':
     start_time = time.time()
