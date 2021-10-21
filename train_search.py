@@ -45,6 +45,18 @@ parser.add_argument('--dropout_rate', action='append', default=[], help='dropout
 parser.add_argument('--add_width', action='append', default=['0'], help='add channels')
 parser.add_argument('--add_layers', action='append', default=['0'], help='add layers')
 parser.add_argument('--cifar100', action='store_true', default=False, help='search with cifar100 dataset')
+parser.add_argument('--hardness', type=float, default=0.9, help='hardness parameter')
+parser.add_argument('--mastery', type=float, default=0.1, help='mastery parameter')
+parser.add_argument('--subset_size', type=int, default=100, help='subset parameter determining size of subdataset in dynamic loader')
+parser.add_argument('--issave', type=bool, default=False, help='do we visualize results')
+parser.add_argument('--dynamic', type=bool, default=False, help='are we doing dynamic dataset')
+parser.add_argument('--vanilla', type=bool, default=False, help='are we doing vanilla')
+parser.add_argument('--isbad', type=bool, default=False, help='are we using bad autoencoder (ablation)')
+parser.add_argument('--isTree', type=bool, default=False, help='do we use tree in dynamic dataloader (probably true)')
+parser.add_argument('--init_train_epochs', type=int, default=5, help='minimum no. epochs to train before updating dynamic subset')
+parser.add_argument('--is_csv', type=bool, default=False, help='saving with csv?')
+parser.add_argument('--is_detection', type=bool, default=False, help='object detection?')
+parser.add_argument('--ncc', type=bool, default=False, help='are we on ncc?')
 
 args = parser.parse_args()
 
