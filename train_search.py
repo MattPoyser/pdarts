@@ -60,15 +60,15 @@ parser.add_argument('--ncc', type=bool, default=False, help='are we on ncc?')
 
 args = parser.parse_args()
 
-args.save = '{}search-{}-{}'.format(args.save, args.note, time.strftime("%Y%m%d-%H%M%S"))
-utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
+# args.save = '{}search-{}-{}'.format(args.save, args.note, time.strftime("%Y%m%d-%H%M%S"))
+# utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
 log_format = '%(asctime)s %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
     format=log_format, datefmt='%m/%d %I:%M:%S %p')
-fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
-fh.setFormatter(logging.Formatter(log_format))
-logging.getLogger().addHandler(fh)
+# fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
+# fh.setFormatter(logging.Formatter(log_format))
+# logging.getLogger().addHandler(fh)
 
 if args.cifar100:
     CIFAR_CLASSES = 100
@@ -180,7 +180,7 @@ def main():
             if epochs - epoch < 5:
                 valid_acc, valid_obj = infer(valid_queue, model, criterion)
                 logging.info('Valid_acc %f', valid_acc)
-        utils.save(model, os.path.join(args.save, 'weights.pt'))
+        # utils.save(model, os.path.join(args.save, 'weights.pt'))
         print('------Dropping %d paths------' % num_to_drop[sp])
         # Save switches info for s-c refinement. 
         if sp == len(num_to_keep) - 1:
