@@ -202,7 +202,7 @@ def main():
                 save_indices(train_queue.dataset.get_printable(), epoch, [item for item in train_queue.dataset.cur_set])
                 just_updated = True
                 if args.ncc and args.visualize:
-                    train_queue.dataset.visualize(pdarts=True)
+                    train_queue.dataset.visualize(framework="pdarts")
 
         # utils.save(model, os.path.join(args.save, 'weights.pt'))
         print('------Dropping %d paths------' % num_to_drop[sp])
