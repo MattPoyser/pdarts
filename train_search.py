@@ -186,6 +186,8 @@ def main():
                     model.module.p = float(drop_rate[sp]) * np.exp(-(epoch - eps_no_arch) * scale_factor)
                     model.module.update_p()
                     train_acc, train_obj, hardness, correct = train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=True)
+                if args.dynamic:
+                    train_queue.dataset.update_correct(correct)
                 logging.info('Train_acc %f', train_acc)
                 epoch_duration = time.time() - epoch_start
                 logging.info('Epoch time: %ds', epoch_duration)
@@ -513,17 +515,17 @@ def keep_2_branches(switches_in, probs):
 def save_indices(data, epoch, images=None):
     if args.issave:
         if args.ncc:
-            with open(f'/home2/lgfm95/nas/gdas/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}.csv', 'w') as csv_file:
+            with open(f'/home2/lgfm95/nas/pdarts/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}.csv', 'w') as csv_file:
                 csv_writer = csv.writer(csv_file, delimiter=' ')
                 csv_writer.writerow(data)
             if images is not None:
-                image_dir = f'/home2/lgfm95/nas/gdas/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}'
+                image_dir = f'/home2/lgfm95/nas/pdarts/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}'
                 os.makedirs(image_dir)
                 for q, image in enumerate(images):
                     image.save(image_dir + f"{q}.png")
 
         else:
-            with open(f'/hdd/PhD/nas/gdas/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}.csv', 'w') as csv_file:
+            with open(f'/hdd/PhD/nas/pdarts/tempSave/curriculums/{args.dataset}/indices_{args.dataset}_{epoch}.csv', 'w') as csv_file:
                 csv_writer = csv.writer(csv_file, delimiter=' ')
                 csv_writer.writerow(data)
 
