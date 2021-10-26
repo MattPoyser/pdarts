@@ -80,7 +80,7 @@ def main():
     print('---------Genotype---------')
     logging.info(genotype)
     print('--------------------------')
-    model = Network(args.init_channels, CIFAR_CLASSES, args.layers, args.auxiliary, genotype)
+    model = Network(args.init_channels, CIFAR_CLASSES, args.layers, args.auxiliary, genotype, dataset=args.dataset)
     model = torch.nn.DataParallel(model)
     model = model.cuda()
     logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
