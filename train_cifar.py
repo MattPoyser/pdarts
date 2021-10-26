@@ -41,6 +41,7 @@ parser.add_argument('--tmp_data_dir', type=str, default='/data/cifar-10/', help=
 parser.add_argument('--note', type=str, default='try', help='note for this run')
 parser.add_argument('--cifar100', action='store_true', default=False, help='if use cifar100')
 parser.add_argument('--genotype',  type=str, help='genotype to use')
+parser.add_argument('--dataset',  default="mnist", type=str, help='dataset to use')
 
 args, unparsed = parser.parse_known_args()
 
@@ -93,16 +94,18 @@ def main():
         weight_decay=args.weight_decay
         )
 
-    if args.cifar100:
-        train_transform, valid_transform = utils._data_transforms_cifar100(args)
-    else:
-        train_transform, valid_transform = utils._data_transforms_cifar10(args)
-    if args.cifar100:
-        train_data = dset.CIFAR100(root=args.tmp_data_dir, train=True, download=True, transform=train_transform)
-        valid_data = dset.CIFAR100(root=args.tmp_data_dir, train=False, download=True, transform=valid_transform)
-    else:
-        train_data = dset.CIFAR10(root=args.tmp_data_dir, train=True, download=True, transform=train_transform)
-        valid_data = dset.CIFAR10(root=args.tmp_data_dir, train=False, download=True, transform=valid_transform)
+    # if args.cifar100:
+    #     train_transform, valid_transform = utils._data_transforms_cifar100(args)
+    # else:
+    #     train_transform, valid_transform = utils._data_transforms_cifar10(args)
+    # if args.cifar100:
+    #     train_data = dset.CIFAR100(root=args.tmp_data_dir, train=True, download=True, transform=train_transform)
+    #     valid_data = dset.CIFAR100(root=args.tmp_data_dir, train=False, download=True, transform=valid_transform)
+    # else:
+    #     train_data = dset.CIFAR10(root=args.tmp_data_dir, train=True, download=True, transform=train_transform)
+    #     valid_data = dset.CIFAR10(root=args.tmp_data_dir, train=False, download=True, transform=valid_transform)
+
+    train_data, valid_data = utils.get_validation_data(args.dataset, args.tmp_data_dir)
 
     train_queue = torch.utils.data.DataLoader(
         train_data, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=args.workers)
