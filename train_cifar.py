@@ -9,6 +9,7 @@ import logging
 import argparse
 import torch.nn as nn
 import genotypes
+from genotypes import Genotype
 import torch.utils
 import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
@@ -32,13 +33,14 @@ parser.add_argument('--auxiliary_weight', type=float, default=0.4, help='weight 
 parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
 parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
 parser.add_argument('--drop_path_prob', type=float, default=0.3, help='drop path probability')
-parser.add_argument('--save', type=str, default='/tmp/checkpoints/', help='experiment name')
+parser.add_argument('--save', type=str, default='./tmp/checkpoints/', help='experiment name')
 parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--arch', type=str, default='PDARTS', help='which architecture to use')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
-parser.add_argument('--tmp_data_dir', type=str, default='/tmp/cache/', help='temp data dir')
+parser.add_argument('--tmp_data_dir', type=str, default='/data/cifar-10/', help='temp data dir')
 parser.add_argument('--note', type=str, default='try', help='note for this run')
 parser.add_argument('--cifar100', action='store_true', default=False, help='if use cifar100')
+parser.add_argument('--genotype',  type=str, help='genotype to use')
 
 args, unparsed = parser.parse_known_args()
 
@@ -72,7 +74,8 @@ def main():
     logging.info("unparsed args = %s", unparsed)
     num_gpus = torch.cuda.device_count()
     
-    genotype = eval("genotypes.%s" % args.arch)
+    # genotype = eval("genotypes.%s" % args.arch)
+    genotype = eval(args.genotype)
     print('---------Genotype---------')
     logging.info(genotype)
     print('--------------------------')
