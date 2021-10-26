@@ -231,6 +231,52 @@ def get_data(args):
 
     return train_data, test_data
 
+
+def get_validation_data(dataset, dir):
+    if dataset == "mnist":
+        dset_cls = dset.MNIST
+        mean = [0.13066051707548254]
+        std = [0.30810780244715075]
+    elif dataset == "fashion":
+        dset_cls = dset.FashionMNIST
+        mean = [0.28604063146254594]
+        std = [0.35302426207299326]
+    elif dataset == "cifar10":
+        dset_cls = dset.CIFAR10
+        mean = [0.5071, 0.4867, 0.4408]
+        std = [0.2675, 0.2565, 0.2761]
+    elif dataset == "imagenet":
+        subset_size = 10000
+        mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+        train_transform = transforms.Compose([
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ])
+        valid_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ])
+        return SubDataset(transforms=train_transform, val_transforms=valid_transform, val=False,
+                                        dataset_name="imagenet", subset_size=subset_size), SubDataset(transforms=valid_transform, val=True, dataset_name="imagenet",
+                               subset_size=subset_size)
+    else:
+        raise TypeError("Unknown dataset : {:}".format(dataset))
+
+    train_transform = transforms.Compose([
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+    valid_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+    return dset_cls(root=dir, train=True, download=False, transform=train_transform), dset_cls(root=dir, train=False, download=False, transform=valid_transform)
+
+
 def count_parameters_in_MB(model):
     return np.sum(np.prod(v.size()) for name, v in model.named_parameters() if "auxiliary" not in name) / 1e6
 
