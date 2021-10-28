@@ -540,8 +540,10 @@ def get_hardness(output, target, is_multi):
         # we want it to be a softmax representation. if we instead take crossentropy loss of each individual cf target
         _, predicted = torch.max(output.data, 1)
         confidence = F.softmax(output, dim=1)
-        raise AttributeError(output.shape, target.shape, predicted.shape, confidence.shape)
-        hardness_scaler = np.where((predicted == target), 1, 0.1) # if correct, simply use confidence as measure of hardness
+        try:
+            hardness_scaler = np.where((predicted == target), 1, 0.1) # if correct, simply use confidence as measure of hardness
+        except RuntimeError:
+            raise AttributeError(output.shape, target.shape, predicted.shape, confidence.shape)
         # therefore if model can easily say yep this is object X, then confidence will be high. if it only just manages to identify
         # object X, confidence if lower
         # if object X is misclassified, hardness needs to be lower still.
