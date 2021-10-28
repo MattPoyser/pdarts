@@ -100,19 +100,19 @@ def main():
     # else:
     #     train_data = dset.CIFAR10(root=args.tmp_data_dir, train=True, download=False, transform=train_transform)
 
-    train_data, test_data = utils.get_data(args)
-    num_train = len(train_data)
-    indices = list(range(num_train))
-    split = int(np.floor(args.train_portion * num_train))
+    train_data, val_data = utils.get_data(args)
+    # num_train = len(train_data)
+    # indices = list(range(num_train))
+    # split = int(np.floor(args.train_portion * num_train))
 
     train_queue = torch.utils.data.DataLoader(
         train_data, batch_size=args.batch_size,
-        sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
+        # sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
         pin_memory=True, num_workers=args.workers)
 
     valid_queue = torch.utils.data.DataLoader(
-        train_data, batch_size=args.batch_size,
-        sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
+        val_data, batch_size=args.batch_size,
+        # sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
         pin_memory=True, num_workers=args.workers)
     
     # build Network
@@ -308,7 +308,6 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
 
     hardness = [None for i in range(len(train_queue))]
     correct = [None for i in range(len(train_queue))]
-    raise AttributeError(args.batch_size, len(train_queue))
     batch_size = args.batch_size
 
     for step, (input, target) in enumerate(train_queue):
