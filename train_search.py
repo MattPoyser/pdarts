@@ -181,13 +181,13 @@ def main():
                 if epoch < eps_no_arch:
                     model.module.p = float(drop_rate[sp]) * (epochs - epoch - 1) / epochs
                     model.module.update_p()
-                    train_acc, train_obj, hardness, correct = train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=False)
+                    train_acc, train_obj, _, _ = train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=False)
                 else:
                     model.module.p = float(drop_rate[sp]) * np.exp(-(epoch - eps_no_arch) * scale_factor)
                     model.module.update_p()
                     train_acc, train_obj, hardness, correct = train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=True)
-                if args.dynamic:
-                    train_queue.dataset.update_correct(correct)
+                    if args.dynamic:
+                        train_queue.dataset.update_correct(correct)
                 logging.info('Train_acc %f', train_acc)
                 epoch_duration = time.time() - epoch_start
                 logging.info('Epoch time: %ds', epoch_duration)
@@ -352,7 +352,8 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
 
         if step % args.report_freq == 0:
             logging.info('TRAIN Step: %03d Objs: %e R1: %f R5: %f', step, objs.avg, top1.avg, top5.avg)
-    raise AttributeError(len(train_queue), batch_size, len(correct), len(new_correct), len(new_hardness))
+    if train_arch:
+        raise AttributeError(len(train_queue), batch_size, len(correct), len(new_correct), len(new_hardness))
 
     return top1.avg, objs.avg, hardness, correct
 
