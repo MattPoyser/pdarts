@@ -353,8 +353,8 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
 
         if step % args.report_freq == 0:
             logging.info('TRAIN Step: %03d Objs: %e R1: %f R5: %f', step, objs.avg, top1.avg, top5.avg)
-    if train_arch:
-        raise AttributeError(len(train_queue), batch_size, len(correct), len(new_correct), len(new_hardness))
+    # if train_arch:
+    #     raise AttributeError(len(train_queue), batch_size, len(correct), len(new_correct), len(new_hardness))
 
     return top1.avg, objs.avg, hardness, correct
 
