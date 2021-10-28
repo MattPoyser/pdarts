@@ -109,7 +109,6 @@ def main():
         train_data, batch_size=args.batch_size,
         # sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
         pin_memory=True, num_workers=args.workers)
-    raise AttributeError(len(train_data), len(train_queue), args.batch_size, args.workers)
 
     valid_queue = torch.utils.data.DataLoader(
         val_data, batch_size=args.batch_size,
@@ -310,7 +309,6 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
     hardness = [None for i in range(len(train_queue))]
     correct = [None for i in range(len(train_queue))]
     batch_size = args.batch_size
-    raise AttributeError(len(train_queue), batch_size)
 
     for step, (input, target) in enumerate(train_queue):
         model.train()
@@ -354,6 +352,7 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
 
         if step % args.report_freq == 0:
             logging.info('TRAIN Step: %03d Objs: %e R1: %f R5: %f', step, objs.avg, top1.avg, top5.avg)
+    raise AttributeError(len(train_queue), batch_size, len(correct), len(new_correct), len(new_hardness))
 
     return top1.avg, objs.avg, hardness, correct
 
