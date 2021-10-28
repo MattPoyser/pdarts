@@ -308,6 +308,7 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
 
     hardness = [None for i in range(len(train_queue))]
     correct = [None for i in range(len(train_queue))]
+    raise AttributeError(args.batch_size, len(train_queue))
     batch_size = args.batch_size
 
     for step, (input, target) in enumerate(train_queue):
