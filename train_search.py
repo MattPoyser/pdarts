@@ -329,6 +329,7 @@ def train(train_queue, valid_queue, model, network_params, criterion, optimizer,
             logits = model(input_search)
             loss_a = criterion(logits, target_search)
 
+            raise AttributeError(logits.shape, targets.shape, loss_a.shape)
             new_hardness, new_correct = get_hardness(logits.cpu(), target.cpu(), False)
             hardness[(step * batch_size):(step * batch_size) + batch_size] = new_hardness  # assumes batch 1 takes idx 0-8, batch 2 takes 9-16, etc.
             correct[(step * batch_size):(step * batch_size) + batch_size] = new_correct
