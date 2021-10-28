@@ -109,7 +109,7 @@ def main():
         train_data, batch_size=args.batch_size,
         # sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
         pin_memory=True, num_workers=args.workers)
-    raise AttributeError(len(train_data), len(train_queue))
+    raise AttributeError(len(train_data), len(train_queue), args.batch_size, args.workers)
 
     valid_queue = torch.utils.data.DataLoader(
         val_data, batch_size=args.batch_size,
