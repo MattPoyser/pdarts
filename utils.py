@@ -10,7 +10,7 @@ sys.path.insert(0, "/home/matt/Documents/hem/perceptual")
 sys.path.insert(0, "/home2/lgfm95/hem/perceptual")
 sys.path.insert(0, "C:\\Users\\Matt\\Documents\\PhD\\x11\\HEM\\perceptual")
 sys.path.insert(0, "/hdd/PhD/hem/perceptual")
-from dataloader import DynamicDataset
+from dataloader_classification import DynamicDataset
 from subloader import SubDataset
 
 
@@ -146,6 +146,7 @@ def get_data(args):
     isize = 64
     nz = 8
     aisize = 256
+    is_concat=False
     if args.dataset == "mnist":
         dset_cls = dset.MNIST
         dynamic_name = "mnist"
@@ -199,9 +200,9 @@ def get_data(args):
             subset_size=args.subset_size,
             is_csv=args.is_csv,
             is_detection=is_detection,
-            convert_to_paths=convert_to_paths,
-            convert_to_lbl_paths=convert_to_lbl_paths,
-            bede=False)
+            is_concat=is_concat,
+            seed=args.seed)
+            # is_csv=False)
         # is_csv=False)
         if args.dataset == "imagenet":
             test_data = SubDataset(transforms=test_transform, val=True, dataset_name=dynamic_name,
