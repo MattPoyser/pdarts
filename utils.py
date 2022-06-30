@@ -159,7 +159,7 @@ def get_data(args):
     elif args.dataset == "cifar10":
         dset_cls = dset.CIFAR10
         dynamic_name = "cifar10"
-        auto_resume = "/home2/lgfm95/hem/perceptual/ganPercCifar10Good.pth.tar"
+        auto_resume = "/home2/lgfm95/hem/perceptual/tripletCifar10MseKGood.pth.tar"
     elif args.dataset == "imagenet":
         dynamic_name = "imagenet"
         isize = 256
