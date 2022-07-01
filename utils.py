@@ -145,22 +145,25 @@ def get_data(args):
     convert_to_lbl_paths = False
     isize = 64
     nz = 8
-    aisize = 256
+    aisize = 3
     is_concat=False
     if args.dataset == "mnist":
         dset_cls = dset.MNIST
         dynamic_name = "mnist"
         grayscale = True
         auto_resume = "/home2/lgfm95/hem/perceptual/ganPercMnistGood.pth.tar"
+        aisize = 1
     elif args.dataset == "fashion":
         dset_cls = dset.FashionMNIST
         dynamic_name = "fashion"
         grayscale = True
         auto_resume = "/home2/lgfm95/hem/perceptual/ganPercFashionGood.pth.tar"
+        aisize = 1
     elif args.dataset == "cifar10":
         dset_cls = dset.CIFAR10
         dynamic_name = "cifar10"
         auto_resume = "/home2/lgfm95/hem/perceptual/tripletCifar10MseKGood.pth.tar"
+        nz = 32
     elif args.dataset == "imagenet":
         dynamic_name = "imagenet"
         isize = 256
