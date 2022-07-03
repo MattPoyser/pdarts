@@ -249,6 +249,10 @@ def get_validation_data(dataset, dir):
         dset_cls = dset.CIFAR10
         mean = [0.5071, 0.4867, 0.4408]
         std = [0.2675, 0.2565, 0.2761]
+    elif dataset == "cifar100":
+        dset_cls = dset.CIFAR100
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
     elif dataset == "imagenet":
         subset_size = 10000
         mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
