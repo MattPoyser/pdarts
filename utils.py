@@ -120,6 +120,9 @@ def data_transform_general(name):
     elif name == "cifar10":
         mean = [0.5071, 0.4867, 0.4408]
         std = [0.2675, 0.2565, 0.2761]
+    elif name == "cifar100":
+        mean = [0.5071, 0.4867, 0.4408]
+        std = [0.2675, 0.2565, 0.2761]
     else:
         raise TypeError("Unknown dataset : {:}".format(name))
 
