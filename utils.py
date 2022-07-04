@@ -164,6 +164,11 @@ def get_data(args):
         dynamic_name = "cifar10"
         auto_resume = "/home2/lgfm95/hem/perceptual/tripletCifar10MseKGood.pth.tar"
         nz = 32
+    elif args.dataset == "cifar100":
+        dset_cls = dset.CIFAR100
+        dynamic_name = "cifar100"
+        auto_resume = "/home2/lgfm95/hem/perceptual/tripletCifar10MseKGood.pth.tar"
+        nz = 32
     elif args.dataset == "imagenet":
         dynamic_name = "imagenet"
         isize = 256
