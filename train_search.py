@@ -45,6 +45,7 @@ parser.add_argument('--note', type=str, default='try', help='note for this run')
 parser.add_argument('--dropout_rate', action='append', default=[], help='dropout rate of skip connect')
 parser.add_argument('--add_width', action='append', default=['0'], help='add channels')
 parser.add_argument('--add_layers', action='append', default=['0'], help='add layers')
+parser.add_argument('--steps', type=int, default=4, help='no. nodes in cell')
 parser.add_argument('--cifar100', action='store_true', default=False, help='search with cifar100 dataset')
 parser.add_argument('--hardness', type=float, default=0.9, help='hardness parameter')
 parser.add_argument('--mastery', type=float, default=0.1, help='mastery parameter')
@@ -119,7 +120,9 @@ def main():
     criterion = nn.CrossEntropyLoss()
     criterion = criterion.cuda()
     switches = []
-    for i in range(14):
+    switches_steps = sum([i for i in range(2, args.steps+2)])
+    for i in range(switches_steps):
+    # for i in range(14):
         switches.append([True for j in range(len(PRIMITIVES))])
     switches_normal = copy.deepcopy(switches)
     switches_reduce = copy.deepcopy(switches)
@@ -140,7 +143,7 @@ def main():
         drop_rate = [0.0, 0.0, 0.0]
     eps_no_archs = [10, 10, 10]
     for sp in range(len(num_to_keep)):
-        model = Network(args.init_channels + int(add_width[sp]), CIFAR_CLASSES, args.layers + int(add_layers[sp]), criterion, switches_normal=switches_normal, switches_reduce=switches_reduce, p=float(drop_rate[sp]), dataset=args.dataset)
+        model = Network(args.init_channels + int(add_width[sp]), CIFAR_CLASSES, args.layers + int(add_layers[sp]), criterion, steps=args.steps, switches_normal=switches_normal, switches_reduce=switches_reduce, p=float(drop_rate[sp]), dataset=args.dataset)
         model = nn.DataParallel(model)
         model = model.cuda()
         logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
