@@ -216,7 +216,8 @@ def main():
         # drop operations with low architecture weights
         arch_param = model.module.arch_parameters()
         normal_prob = F.softmax(arch_param[0], dim=sm_dim).data.cpu().numpy()        
-        for i in range(14):
+        # for i in range(14):
+        for i in range(switches_steps):
             idxs = []
             for j in range(len(PRIMITIVES)):
                 if switches_normal[i][j]:
@@ -229,7 +230,8 @@ def main():
             for idx in drop:
                 switches_normal[i][idxs[idx]] = False
         reduce_prob = F.softmax(arch_param[1], dim=-1).data.cpu().numpy()
-        for i in range(14):
+        # for i in range(14):
+        for i in range(switches_steps):
             idxs = []
             for j in range(len(PRIMITIVES)):
                 if switches_reduce[i][j]:
@@ -249,10 +251,13 @@ def main():
             arch_param = model.module.arch_parameters()
             normal_prob = F.softmax(arch_param[0], dim=sm_dim).data.cpu().numpy()
             reduce_prob = F.softmax(arch_param[1], dim=sm_dim).data.cpu().numpy()
-            normal_final = [0 for idx in range(14)]
-            reduce_final = [0 for idx in range(14)]
+            # normal_final = [0 for idx in range(14)]
+            normal_final = [0 for idx in range(switches_steps)]
+            # reduce_final = [0 for idx in range(14)]
+            reduce_final = [0 for idx in range(switches_steps)]
             # remove all Zero operations
-            for i in range(14):
+            # for i in range(14):
+            for i in range(switches_steps):
                 if switches_normal_2[i][0] == True:
                     normal_prob[i][0] = 0
                 normal_final[i] = max(normal_prob[i])
@@ -277,7 +282,8 @@ def main():
                 start = end
                 n = n + 1
             # set switches according the ranking of arch parameters
-            for i in range(14):
+            # for i in range(14):
+            for i in range(switches_steps):
                 if not i in keep_normal:
                     for j in range(len(PRIMITIVES)):
                         switches_normal[i][j] = False
