@@ -126,6 +126,7 @@ def main():
         switches.append([True for j in range(len(PRIMITIVES))])
     switches_normal = copy.deepcopy(switches)
     switches_reduce = copy.deepcopy(switches)
+
     # To be moved to args
     num_to_keep = [5, 3, 1]
     num_to_drop = [3, 2, 2]
@@ -167,13 +168,13 @@ def main():
         hardness = None
         just_updated = True
 
-        valid_acc1 = 0
+        valid_acc = 0
         if args.issave:
             save_indices(train_queue.dataset.get_printable(), 0)
         for epoch in range(epochs):
             scheduler.step()
 
-            epoch_type = get_epoch_type(epoch, hardness, valid_acc1)
+            epoch_type = get_epoch_type(epoch, hardness, valid_acc)
             if epoch_type or just_updated or not args.dynamic:  # 1 is train, as normal (0 is dataset update)
                 just_updated = False
 
@@ -230,6 +231,7 @@ def main():
             for idx in drop:
                 switches_normal[i][idxs[idx]] = False
         reduce_prob = F.softmax(arch_param[1], dim=-1).data.cpu().numpy()
+
         # for i in range(14):
         for i in range(switches_steps):
             idxs = []
@@ -269,7 +271,8 @@ def main():
             keep_reduce = [0, 1]
             n = 3
             start = 2
-            for i in range(3):
+            # for i in range(3): # (original) 3 gives keep_normal/reduce length of 8 (i.e. steps=4 *2 )
+            for i in range(args.steps-1): # 8 gives keep_normal/reduce length of 16 (i.e. steps=8 * 2 ). general rule: steps-1
                 end = start + n
                 tbsn = normal_final[start:end]
                 tbsr = reduce_final[start:end]
@@ -281,6 +284,7 @@ def main():
                 keep_reduce.append(edge_r[-2] + start)
                 start = end
                 n = n + 1
+
             # set switches according the ranking of arch parameters
             # for i in range(14):
             for i in range(switches_steps):
@@ -295,10 +299,12 @@ def main():
             logging.info(genotype)
             ## restrict skipconnect (normal cell only)
             logging.info('Restricting skipconnect...')
+
+            top_max_sk = switches_steps
             # generating genotypes with different numbers of skip-connect operations
-            for sks in range(0, 9):
-                max_sk = 8 - sks                
-                num_sk = check_sk_number(switches_normal)               
+            for sks in range(0, top_max_sk+1):
+                max_sk = top_max_sk - sks
+                num_sk = check_sk_number(switches_normal)
                 if not num_sk > max_sk:
                     continue
                 while num_sk > max_sk:
@@ -308,7 +314,7 @@ def main():
                     num_sk = check_sk_number(switches_normal)
                 logging.info('Number of skip-connect: %d', max_sk)
                 genotype = parse_network(switches_normal, switches_reduce)
-                logging.info(genotype)              
+                logging.info(genotype)
 
 def train(train_queue, valid_queue, model, network_params, criterion, optimizer, optimizer_a, lr, train_arch=True):
     objs = utils.AvgrageMeter()
@@ -399,7 +405,7 @@ def parse_network(switches_normal, switches_reduce):
         n = 2
         start = 0
         gene = []
-        step = 4
+        step = args.steps
         for i in range(step):
             end = start + n
             for j in range(start, end):
@@ -507,7 +513,7 @@ def keep_2_branches(switches_in, probs):
     keep = [0, 1]
     n = 3
     start = 2
-    for i in range(3):
+    for i in range(args.steps - 1):
         end = start + n
         tb = final_prob[start:end]
         edge = sorted(range(n), key=lambda x: tb[x])
