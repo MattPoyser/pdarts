@@ -203,7 +203,7 @@ def main():
             else:
                 print("updating subset")
                 train_queue.dataset.update_subset(hardness, epoch)
-                save_indices(train_queue.dataset.get_printable(), epoch, [item for item in train_queue.dataset.cur_set])
+                save_indices(train_queue.dataset.get_printable(), epoch, [train_loader.dataset.full_set.__getitem__(idx) for idx in train_loader.dataset.idx])
                 just_updated = True
                 if args.ncc and args.visualize:
                     train_queue.dataset.visualize(framework="pdarts")
