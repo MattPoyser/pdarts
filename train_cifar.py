@@ -74,11 +74,13 @@ def main():
     logging.info("args = %s", args)
     logging.info("unparsed args = %s", unparsed)
     num_gpus = torch.cuda.device_count()
-    
-    # genotype = eval("genotypes.%s" % args.arch)
-    genotype = eval(args.genotype)
+
     print('---------Genotype---------')
-    logging.info(genotype)
+    if args.genotype is None:
+        genotype = eval("genotypes.%s" % args.arch)
+    else:
+        genotype = eval(args.genotype)
+        logging.info(genotype)
     print('--------------------------')
     model = Network(args.init_channels, CIFAR_CLASSES, args.layers, args.auxiliary, genotype, dataset=args.dataset)
     model = torch.nn.DataParallel(model)
