@@ -106,7 +106,8 @@ def main():
         momentum=args.momentum,
         weight_decay=args.weight_decay
         )
-    data_dir = os.path.join(args.tmp_data_dir, 'imagenet')
+    # data_dir = os.path.join(args.tmp_data_dir, 'imagenet')
+    data_dir = args.tmp_data_dir
     traindir = os.path.join(data_dir, 'train')
     validdir = os.path.join(data_dir, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
