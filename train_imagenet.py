@@ -45,6 +45,7 @@ parser.add_argument('--resume', type=str, default=None, help='resume from checkp
 
 args, unparsed = parser.parse_known_args()
 
+save_root = args.save
 args.save = '{}eval-{}-{}'.format(args.save, args.note, time.strftime("%Y%m%d-%H%M%S"))
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
@@ -112,10 +113,8 @@ def main():
     best_acc_top1 = 0
     best_acc_top5 = 0
     if args.resume is not None:
-        save_checkpoint = os.path.join(args.save, "checkpoint.pth.tar")
-        assert os.path.isfile(save_checkpoint), args.save
-        print("==> loading checkpoint '{}'".format(save_checkpoint))
-        checkpoint = torch.load(save_checkpoint)
+        print("==> loading checkpoint '{}'".format(args.resume))
+        checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         best_acc_top1 = checkpoint['best_acc_top1']
