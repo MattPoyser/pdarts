@@ -50,7 +50,8 @@ def main():
   model = model.cuda()
   try:
     utils.load(model, args.model_path)
-  except:
+  except RuntimeError as e:
+    print(e)
     model = model.module
     utils.load(model, args.model_path)
 
