@@ -40,6 +40,7 @@ parser.add_argument('--label_smooth', type=float, default=0.1, help='label smoot
 parser.add_argument('--lr_scheduler', type=str, default='linear', help='lr scheduler, linear or cosine')
 parser.add_argument('--tmp_data_dir', type=str, default='/tmp/cache/', help='temp data dir')
 parser.add_argument('--note', type=str, default='try', help='note for this run')
+parser.add_argument('--resume', type=str, default=None, help='resume from checkpoint or not?')
 
 
 args, unparsed = parser.parse_known_args()
@@ -106,6 +107,22 @@ def main():
         momentum=args.momentum,
         weight_decay=args.weight_decay
         )
+
+    start_epoch = 0
+    best_acc_top1 = 0
+    best_acc_top5 = 0
+    if args.resume is not None:
+        save_checkpoint = os.path.join(args.save, "checkpoint.pth.tar")
+        assert os.path.isfile(save_checkpoint), args.save
+        print("==> loading checkpoint '{}'".format(save_checkpoint))
+        checkpoint = torch.load(save_checkpoint)
+        model.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        best_acc_top1 = checkpoint['best_acc_top1']
+        start_epoch = checkpoint['epoch']
+    else:
+        print("not loading from checkpoint")
+
     # data_dir = os.path.join(args.tmp_data_dir, 'imagenet')
     data_dir = args.tmp_data_dir
     traindir = os.path.join(data_dir, 'train')
@@ -141,9 +158,7 @@ def main():
 
 #    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.decay_period, gamma=args.gamma)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(args.epochs))
-    best_acc_top1 = 0
-    best_acc_top5 = 0
-    for epoch in range(args.epochs):
+    for epoch in range(start_epoch, args.epochs):
         if args.lr_scheduler == 'cosine':
             scheduler.step()
             current_lr = scheduler.get_lr()[0]
