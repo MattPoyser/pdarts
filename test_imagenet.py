@@ -26,6 +26,7 @@ parser.add_argument('--layers', type=int, default=14, help='total number of laye
 parser.add_argument('--model_path', type=str, default='../models/imagenet.pth.tar', help='path of pretrained model')
 parser.add_argument('--auxiliary', action='store_true', default=False, help='use auxiliary tower')
 parser.add_argument('--arch', type=str, default='PDARTS', help='which architecture to use')
+parser.add_argument('--load_own', action="store_true", help='dataparallel load fix')
 args = parser.parse_args()
 
 log_format = '%(asctime)s %(message)s'
@@ -44,9 +45,14 @@ def main():
 
   genotype = eval("genotypes.%s" % args.arch)
   model = Network(args.init_channels, CLASSES, args.layers, args.auxiliary, genotype)
-  model = nn.DataParallel(model)
-  model = model.cuda()
-  model.load_state_dict(torch.load(args.model_path)['state_dict'])
+  if args.load_own:
+    model.load_state_dict(torch.load(args.model_path)['state_dict'])
+    model = nn.DataParallel(model)
+    model = model.cuda()
+  else:
+    model = nn.DataParallel(model)
+    model = model.cuda()
+    model.load_state_dict(torch.load(args.model_path)['state_dict'])
 
   logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
 
