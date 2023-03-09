@@ -27,6 +27,7 @@ parser.add_argument('--model_path', type=str, default='../models/imagenet.pth.ta
 parser.add_argument('--auxiliary', action='store_true', default=False, help='use auxiliary tower')
 parser.add_argument('--arch', type=str, default='PDARTS', help='which architecture to use')
 parser.add_argument('--load_own', action="store_true", help='dataparallel load fix')
+parser.add_argument('--shapley', action="store_true", help='shapley pretrained?')
 args = parser.parse_args()
 
 log_format = '%(asctime)s %(message)s'
