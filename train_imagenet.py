@@ -89,7 +89,7 @@ def main():
     print('---------Genotype---------')
     logging.info(genotype)
     print('--------------------------') 
-    model = Network(args.init_channels, CLASSES, args.layers, args.auxiliary, genotype, args.shapley)
+    model = Network(args.init_channels, CLASSES, args.layers, args.auxiliary, genotype)
     if num_gpus > 1:
         model = nn.DataParallel(model)
         model = model.cuda()
