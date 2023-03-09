@@ -41,6 +41,7 @@ parser.add_argument('--lr_scheduler', type=str, default='linear', help='lr sched
 parser.add_argument('--tmp_data_dir', type=str, default='/tmp/cache/', help='temp data dir')
 parser.add_argument('--note', type=str, default='try', help='note for this run')
 parser.add_argument('--resume', type=str, default=None, help='resume from checkpoint or not?')
+parser.add_argument('--shapley', action="store_true", help='shapley pretrained?')
 
 
 args, unparsed = parser.parse_known_args()
@@ -89,7 +90,7 @@ def main():
     print('---------Genotype---------')
     logging.info(genotype)
     print('--------------------------') 
-    model = Network(args.init_channels, CLASSES, args.layers, args.auxiliary, genotype)
+    model = Network(args.init_channels, CLASSES, args.layers, args.auxiliary, genotype, args.shapley)
     if num_gpus > 1:
         model = nn.DataParallel(model)
         model = model.cuda()

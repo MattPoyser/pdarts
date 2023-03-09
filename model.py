@@ -82,19 +82,32 @@ class AuxiliaryHeadCIFAR(nn.Module):
 
 class AuxiliaryHeadImageNet(nn.Module):
 
-    def __init__(self, C, num_classes):
+    def __init__(self, C, num_classes, shapley=False):
         """assuming input size 14x14"""
         super(AuxiliaryHeadImageNet, self).__init__()
-        self.features = nn.Sequential(
-            nn.ReLU(inplace=True),
-            nn.AvgPool2d(5, stride=2, padding=0, count_include_pad=False),
-            nn.Conv2d(C, 128, 1, bias=False),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 768, 2, bias=False),
-            nn.BatchNorm2d(768),
-            nn.ReLU(inplace=True)
-        )
+        if shapley:
+            self.features = nn.Sequential(
+                nn.ReLU(inplace=True),
+                nn.AvgPool2d(5, stride=2, padding=0, count_include_pad=False),
+                nn.Conv2d(C, 128, 1, bias=False),
+                nn.BatchNorm2d(128),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(128, 768, 2, bias=False),
+                # nn.BatchNorm2d(768),
+                nn.ReLU(inplace=True)
+            )
+        else:
+
+            self.features = nn.Sequential(
+                nn.ReLU(inplace=True),
+                nn.AvgPool2d(5, stride=2, padding=0, count_include_pad=False),
+                nn.Conv2d(C, 128, 1, bias=False),
+                nn.BatchNorm2d(128),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(128, 768, 2, bias=False),
+                nn.BatchNorm2d(768),
+                nn.ReLU(inplace=True)
+            )
         self.classifier = nn.Linear(768, num_classes)
 
     def forward(self, x):
@@ -152,7 +165,7 @@ class NetworkCIFAR(nn.Module):
 
 class NetworkImageNet(nn.Module):
 
-    def __init__(self, C, num_classes, layers, auxiliary, genotype):
+    def __init__(self, C, num_classes, layers, auxiliary, genotype, shapley=False):
         super(NetworkImageNet, self).__init__()
         self._layers = layers
         self._auxiliary = auxiliary
@@ -187,7 +200,7 @@ class NetworkImageNet(nn.Module):
                 C_to_auxiliary = C_prev
 
         if auxiliary:
-            self.auxiliary_head = AuxiliaryHeadImageNet(C_to_auxiliary, num_classes)
+            self.auxiliary_head = AuxiliaryHeadImageNet(C_to_auxiliary, num_classes, shapley=shapley)
         self.global_pooling = nn.AvgPool2d(7)
         self.classifier = nn.Linear(C_prev, num_classes)
 
