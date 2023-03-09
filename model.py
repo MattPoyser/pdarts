@@ -201,6 +201,7 @@ class NetworkImageNet(nn.Module):
 
         if auxiliary:
             self.auxiliary_head = AuxiliaryHeadImageNet(C_to_auxiliary, num_classes, shapley=shapley)
+        assert False, self.auxiliary_head
         self.global_pooling = nn.AvgPool2d(7)
         self.classifier = nn.Linear(C_prev, num_classes)
 
