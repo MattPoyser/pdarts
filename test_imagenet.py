@@ -45,7 +45,7 @@ def main():
   logging.info("args = %s", args)
 
   genotype = eval("genotypes.%s" % args.arch)
-  model = Network(args.init_channels, CLASSES, args.layers, args.auxiliary, genotype)
+  model = Network(args.init_channels, CLASSES, args.layers, args.auxiliary, genotype, args.shapley)
   if args.load_own:
     model.load_state_dict(torch.load(args.model_path)['state_dict'])
     model = nn.DataParallel(model)
